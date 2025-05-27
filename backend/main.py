@@ -23,9 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Directories for uploads and converted files
-UPLOAD_DIR = Path("uploads")
-CONVERTED_DIR = Path("converted")
+# Directories for uploads and converted files (always inside backend/)
+BACKEND_DIR = Path(__file__).parent.resolve()
+UPLOAD_DIR = BACKEND_DIR / "uploads"
+CONVERTED_DIR = BACKEND_DIR / "converted"
 UPLOAD_DIR.mkdir(exist_ok=True)
 CONVERTED_DIR.mkdir(exist_ok=True)
 
