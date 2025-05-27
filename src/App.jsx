@@ -91,8 +91,17 @@ function App() {
       // Try to get filename from Content-Disposition header
       let filename = 'converted_file';
       const disposition = res.headers.get('content-disposition');
-      if (disposition && disposition.includes('filename=')) {
-        filename = disposition.split('filename=')[1].replace(/['\"]/g, '').trim();
+      if (disposition) {
+        // Robustly extract filename using regex
+        const match = disposition.match(/filename\*=UTF-8''([^;\n]*)/);
+        if (match && match[1]) {
+          filename = decodeURIComponent(match[1]);
+        } else {
+          const fallback = disposition.match(/filename="?([^";\n]+)"?/);
+          if (fallback && fallback[1]) {
+            filename = fallback[1];
+          }
+        }
       }
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
