@@ -1,0 +1,82 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+body {
+  background: #181a1b;
+  color: #f6f8fa;
+}
+
+.container {
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 2rem;
+  background: #23272e;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+  text-align: center;
+  color: #f6f8fa;
+}
+input[type="file"] {
+  margin: 1rem 0;
+  color: #f6f8fa;
+}
+button {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  background: #646cff;
+  color: #fff;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: background 0.2s;
+}
+button:disabled {
+  background: #444a;
+  cursor: not-allowed;
+}
+a {
+  color: #8ab4f8;
+  font-weight: bold;
+  text-decoration: none;
+}
