@@ -1,6 +1,6 @@
 # Data File Converter Web App
 
-This project allows users to upload a Spyder .py file and convert it to a Jupyter Notebook (.ipynb) via a web interface.
+This project allows users to upload a Spyder .py file and convert it to a Jupyter Notebook (.ipynb) or other data science formats via a web interface.
 
 ## Structure
 - `backend/` - FastAPI Python backend for file upload, conversion, and download
@@ -24,3 +24,4 @@ npm run dev
 ---
 
 See the PRD for requirements and future plans.
+# This file describes the overall project structure and how to run both backend and frontend.

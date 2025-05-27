@@ -1,7 +1,9 @@
+// App.jsx - Main React component for Data Science File Converter
 import { useState, useRef } from 'react'
 import './App.css'
 
 function App() {
+  // State hooks for file, upload status, errors, download URL, etc.
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -10,7 +12,7 @@ function App() {
   const [targetFormat, setTargetFormat] = useState('.ipynb');
   const fileInputRef = useRef();
 
-  // Supported conversions for UI
+  // Supported conversions for UI dropdown
   const formatOptions = [
     { label: 'Spyder .py → Jupyter .ipynb', value: '.ipynb', input: '.py' },
     { label: 'CSV → JSON', value: '.json', input: '.csv' },
@@ -23,12 +25,14 @@ function App() {
     { label: 'HDF5 → CSV', value: '.csv', input: '.hdf5' },
   ];
 
+  // Filter valid conversions for the uploaded file
   const getAllowedFormats = () => {
     if (!selectedFile) return [];
     const ext = selectedFile.name.split('.').pop().toLowerCase();
     return formatOptions.filter(opt => opt.input.replace('.', '') === ext);
   };
 
+  // Handle file selection
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
     setError('');
@@ -36,6 +40,7 @@ function App() {
     setStatus('');
   };
 
+  // Upload file and request conversion
   const handleUpload = async () => {
     if (!selectedFile) {
       setError('Please select a file to upload.');
@@ -75,6 +80,7 @@ function App() {
     }
   };
 
+  // Download the converted file as a blob
   const handleDownload = async () => {
     if (!downloadUrl) return;
     setStatus('Downloading...');
@@ -83,10 +89,10 @@ function App() {
       if (!res.ok) throw new Error('Download failed');
       const blob = await res.blob();
       // Try to get filename from Content-Disposition header
-      let filename = 'converted.ipynb';
+      let filename = 'converted_file';
       const disposition = res.headers.get('content-disposition');
       if (disposition && disposition.includes('filename=')) {
-        filename = disposition.split('filename=')[1].replace(/['"]/g, '').trim();
+        filename = disposition.split('filename=')[1].replace(/['\"]/g, '').trim();
       }
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -103,9 +109,11 @@ function App() {
     }
   };
 
+  // Render the UI
   return (
     <div className="container">
-      <h1>Data File Converter</h1>
+      <h1>Data Science File Converter</h1>
+      {/* File input */}
       <input
         type="file"
         accept={formatOptions.map(opt => opt.input).filter((v, i, arr) => arr.indexOf(v) === i).join(',')}
@@ -113,6 +121,7 @@ function App() {
         ref={fileInputRef}
         disabled={uploading}
       />
+      {/* Target format dropdown */}
       <select
         value={targetFormat}
         onChange={e => setTargetFormat(e.target.value)}
@@ -123,11 +132,14 @@ function App() {
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
       </select>
+      {/* Upload button */}
       <button onClick={handleUpload} disabled={uploading || !selectedFile || getAllowedFormats().length === 0}>
         {uploading ? 'Uploading...' : 'Upload & Convert'}
       </button>
+      {/* Status and error messages */}
       {status && <p><b>Status:</b> {status}</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+      {/* Download button */}
       {downloadUrl && (
         <button onClick={handleDownload} style={{ display: 'block', marginTop: 16 }}>
           Download Converted File
