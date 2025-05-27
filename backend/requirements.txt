@@ -1,3 +1,9 @@
 fastapi
 uvicorn
 nbformat
+pandas
+pyarrow
+openpyxl
+tables
+pytest
+fastapi[all]
