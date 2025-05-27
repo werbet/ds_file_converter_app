@@ -1,0 +1,20 @@
+# Ignore test-generated temp files
+*.pyc
+__pycache__/
+uploads/
+converted/
+*.tmp
+*.temp
+*.log
+# Ignore temp files created by tempfile
+*.csv
+*.py
+*.json
+*.xlsx
+*.parquet
+*.hdf5
+# But do not ignore source or committed test files
+!test_main.py
+!main.py
+!requirements.txt
+!README.md

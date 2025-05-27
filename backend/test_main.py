@@ -33,15 +33,18 @@ def test_py_to_ipynb_conversion():
         f.write(py_content.encode())
         f.flush()
         f.seek(0)
-        files = {'file': (os.path.basename(f.name), open(f.name, 'rb'))}
-        data = {'target_format': '.ipynb'}
-        resp = client.post("/upload/", files=files, data=data)
+        with open(f.name, 'rb') as file_obj:
+            files = {'file': (os.path.basename(f.name), file_obj)}
+            data = {'target_format': '.ipynb'}
+            resp = client.post("/upload/", files=files, data=data)
         assert resp.status_code == 200
         file_id = resp.json()['file_id']
         # Download
         download = client.get(f"/download/{file_id}")
         assert download.status_code == 200
-        assert download.headers['content-type'] == 'application/json' or 'application/octet-stream' in download.headers['content-type']
+        content_disp = download.headers.get('content-disposition', '')
+        assert content_disp.endswith('.ipynb"') or '.ipynb' in content_disp
+        assert download.headers['content-type'] in ['application/json', 'application/octet-stream', 'application/x-ipynb+json']
     os.unlink(f.name)
 
 def test_csv_to_json_conversion():
@@ -50,14 +53,17 @@ def test_csv_to_json_conversion():
         f.write(csv_content.encode())
         f.flush()
         f.seek(0)
-        files = {'file': (os.path.basename(f.name), open(f.name, 'rb'))}
-        data = {'target_format': '.json'}
-        resp = client.post("/upload/", files=files, data=data)
+        with open(f.name, 'rb') as file_obj:
+            files = {'file': (os.path.basename(f.name), file_obj)}
+            data = {'target_format': '.json'}
+            resp = client.post("/upload/", files=files, data=data)
         assert resp.status_code == 200
         file_id = resp.json()['file_id']
         # Download
         download = client.get(f"/download/{file_id}")
         assert download.status_code == 200
+        content_disp = download.headers.get('content-disposition', '')
+        assert content_disp.endswith('.json"') or '.json' in content_disp
         assert 'application/json' in download.headers['content-type'] or 'application/octet-stream' in download.headers['content-type']
     os.unlink(f.name)
 
@@ -67,8 +73,9 @@ def test_invalid_conversion():
         f.write(txt_content.encode())
         f.flush()
         f.seek(0)
-        files = {'file': (os.path.basename(f.name), open(f.name, 'rb'))}
-        data = {'target_format': '.ipynb'}
-        resp = client.post("/upload/", files=files, data=data)
+        with open(f.name, 'rb') as file_obj:
+            files = {'file': (os.path.basename(f.name), file_obj)}
+            data = {'target_format': '.ipynb'}
+            resp = client.post("/upload/", files=files, data=data)
         assert resp.status_code == 400
     os.unlink(f.name)

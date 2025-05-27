@@ -142,10 +142,16 @@ async def upload_file(file: UploadFile = File(...), target_format: str = File(..
 async def download_file(file_id: str):
     """
     Download the converted file by file_id.
+    Sets Content-Disposition header with correct filename and extension.
     """
     for f in CONVERTED_DIR.iterdir():
         if f.name.startswith(file_id):
-            return FileResponse(f)
+            # The output_name is always: {file_id}_{base_name}{output_ext}
+            # Remove the file_id and underscore to get the original base name + extension
+            output_name = f.name[len(file_id)+1:] if f.name.startswith(file_id + '_') else f.name
+            return FileResponse(f, headers={
+                "Content-Disposition": f'attachment; filename="{output_name}"'
+            })
     raise HTTPException(status_code=404, detail="Converted file not found.")
 
 @app.get("/ping")
