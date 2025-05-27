@@ -1,7 +1,7 @@
 # main.py - Backend for Data Science File Converter
 # FastAPI app for converting between data science file formats
 
-from fastapi import FastAPI, UploadFile, File, HTTPException  # FastAPI imports for API and file handling
+from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks  # FastAPI imports for API and file handling
 from fastapi.responses import FileResponse, JSONResponse      # For file and JSON responses
 from fastapi.middleware.cors import CORSMiddleware           # For CORS support
 import os
@@ -28,8 +28,11 @@ app.add_middleware(
 BACKEND_DIR = Path(__file__).parent.resolve()
 UPLOAD_DIR = BACKEND_DIR / "uploads"
 CONVERTED_DIR = BACKEND_DIR / "converted"
-UPLOAD_DIR.mkdir(exist_ok=True)
-CONVERTED_DIR.mkdir(exist_ok=True)
+# Delete and recreate uploads/ and converted/ on server start
+for d in [UPLOAD_DIR, CONVERTED_DIR]:
+    if d.exists():
+        shutil.rmtree(d)
+    d.mkdir(exist_ok=True)
 
 # Supported file conversions (input_ext, output_ext)
 SUPPORTED_CONVERSIONS = {
@@ -145,16 +148,40 @@ async def download_file(file_id: str):
     """
     Download the converted file by file_id.
     Sets Content-Disposition header with correct filename and extension.
+    Deletes the uploaded and converted files after download.
     """
+    converted_file = None
     for f in CONVERTED_DIR.iterdir():
         if f.name.startswith(file_id):
-            # The output_name is always: {file_id}_{base_name}{output_ext}
-            # Remove the file_id and underscore to get the original base name + extension
+            converted_file = f
             output_name = f.name[len(file_id)+1:] if f.name.startswith(file_id + '_') else f.name
-            return FileResponse(f, headers={
-                "Content-Disposition": f'attachment; filename="{output_name}"'
-            })
-    raise HTTPException(status_code=404, detail="Converted file not found.")
+            break
+    if not converted_file:
+        raise HTTPException(status_code=404, detail="Converted file not found.")
+
+    # Find and delete the uploaded file
+    for f in UPLOAD_DIR.iterdir():
+        if f.name.startswith(file_id):
+            try:
+                f.unlink()
+            except Exception:
+                pass
+            break
+
+    # Prepare response and schedule deletion of converted file after response is sent
+    response = FileResponse(converted_file, headers={
+        "Content-Disposition": f'attachment; filename="{output_name}"'
+    })
+
+    # Use background task to delete the converted file after sending
+    def delete_converted():
+        try:
+            converted_file.unlink()
+        except Exception:
+            pass
+    response.background = BackgroundTasks()
+    response.background.add_task(delete_converted)
+    return response
 
 @app.get("/ping")
 def ping():
